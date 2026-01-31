@@ -1,19 +1,29 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import cron from "node-cron";
+import http from "http";
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
 });
 
-const CHANNEL_ID = process.env.CHANNEL_ID;
 const TOKEN = process.env.TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID;
+const PORT = process.env.PORT || 3000;
 
+// 🌐 Fake Webserver für Render Free
+http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Bot läuft ✅");
+}).listen(PORT, () => {
+  console.log(`🌐 Webserver läuft auf Port ${PORT}`);
+});
+
+// 🤖 Discord Bot ready
 client.once("ready", () => {
   console.log(`✅ Bot online als ${client.user.tag}`);
 });
 
-// 🔁 Restart Zeiten: alle 6 Stunden
-// 00:00, 06:00, 12:00, 18:00
+// ⏰ Restart Schedule (alle 6 Stunden)
 cron.schedule("0 0,6,12,18 * * *", async () => {
   const channel = await client.channels.fetch(CHANNEL_ID);
 
